@@ -1,0 +1,26 @@
+name: Send a Discord message when new Youtube videos update
+on:
+  youtube:
+    channel_id:
+      - UC08tP3KIyCK9vYNZm5qQuiw
+jobs:
+  discord:
+    name: Send a message to discord
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare message
+        id: prepare
+        run: |
+          TITLE="${{on.youtube.outputs.title}}"
+          ESCAPED_TITLE="${TITLE//\'/\\\'}"
+          ESCAPED_TITLE="${ESCAPED_TITLE//\"/\\\"}"
+          echo "Escaped title: $ESCAPED_TITLE"
+          echo "::set-output name=escaped_title::$ESCAPED_TITLE"
+      - name: Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_USERNAME: ${{ secrets.DISCORD_USERNAME_ASANMEDICALCENTER }}
+          DISCORD_AVATAR: ${{ secrets.DISCORD_AVATAR_ASANMEDICALCENTER }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: "`서울아산병원 - YouTube`'\n'**${{steps.prepare.outputs.escaped_title}}**'\n'${{on.youtube.outputs.link}}"
