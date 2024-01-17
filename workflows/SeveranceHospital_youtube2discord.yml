@@ -12,8 +12,8 @@ jobs:
         id: prepare
         run: |
           TITLE="${{on.youtube.outputs.title}}"
-          ESCAPED_TITLE="${TITLE//\'/\\\'}"
-          ESCAPED_TITLE="${ESCAPED_TITLE//\"/\\\"}"
+          # 따옴표, 백슬래시, 달러, 백틱, 파이프 이스케이프 처리
+          ESCAPED_TITLE=$(echo "$TITLE" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | sed "s/'/\\\'/g" | sed 's/\$/\\$/g' | sed 's/`/\\`/g' | sed 's/|/\\|/g')
           echo "Escaped title: $ESCAPED_TITLE"
           echo "::set-output name=escaped_title::$ESCAPED_TITLE"
       - name: Discord notification
