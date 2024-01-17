@@ -1,0 +1,26 @@
+name: Send a Discord message when new Youtube videos update
+on:
+  youtube:
+    channel_id:
+      - UC6xOohkpWzKwdWMlTQLgYrA
+jobs:
+  discord:
+    name: Send a message to discord
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare message
+        id: prepare
+        run: |
+          TITLE="${{on.youtube.outputs.title}}"
+          # 따옴표, 백슬래시, 달러, 백틱, 파이프 이스케이프 처리
+          ESCAPED_TITLE=$(echo "$TITLE" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | sed "s/'/\\\'/g" | sed 's/\$/\\$/g' | sed 's/`/\\`/g' | sed 's/|/\\|/g')
+          echo "Escaped title: $ESCAPED_TITLE"
+          echo "::set-output name=escaped_title::$ESCAPED_TITLE"
+      - name: Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_USERNAME: ${{ secrets.DISCORD_USERNAME_CMCSVH }}
+          DISCORD_AVATAR: ${{ secrets.DISCORD_AVATAR_CMCSVH }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: "`가톨릭대학교 성빈센트병원 - YouTube`'\n'**${{steps.prepare.outputs.escaped_title}}**'\n'${{on.youtube.outputs.link}}"
